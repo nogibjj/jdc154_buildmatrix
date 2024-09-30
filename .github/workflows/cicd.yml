@@ -1,0 +1,39 @@
+name: cicd
+
+on: #on key is used to specify the events that trigger the workflow
+  push: #event type 
+    branches: [ "main" ]  
+  pull_request: #event type 
+    branches: [ "main" ] 
+  workflow_dispatch:
+
+
+jobs: 
+  init_build: 
+    runs-on: ubuntu-latest # "runs-on" key determines the OS and env. steps will execute within
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+    steps: # steps key is used to define a sequence of individual tasks or 
+           # steps that should be executed as part of a job (init_build) in your workflow.
+           # steps are executed sequentially
+       
+      - uses: actions/checkout@v2 #checks out (clones) the source code of your GitHub repo into the runner's workspace (built-in Action)
+                                  # The "uses" key specifies which GitHub Action or action template should be used for this step
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: make install
+
+      - name: Lint 
+        run: make lint
+      
+      - name: Format
+        run: make format
+
+      
+      - name: Test
+        run: make test
